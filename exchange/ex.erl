@@ -34,6 +34,8 @@ create_process(N) ->
 	home ! Pid,
 	create_process(N-1).
 
+% 'process' is executed by the processes as they spawn, and they 
+% return to it after performing the exchanges
 process(V) ->
 	io:format("Process ~p now has value ~p ~n", [self(), V]),
 	receive 
@@ -43,13 +45,17 @@ process(V) ->
 			exchange(N)
 	end.
 
+% 'exchange' is executed by the functions as they swap values.
+% Value is the value that originally belongs to them and R is 
+% the new value.
 exchange(Value) ->
 	'queue' ! {self(), Value},
 	receive
 		R ->
 			process(R)
 	end.
-
+% 'exch_controller' performs the swap. It is executed by a 
+% centralized process.
 exch_controller() ->
 	receive 
 		{S1, V1} ->
